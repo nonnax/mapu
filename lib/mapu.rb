@@ -29,10 +29,12 @@ module Mapu
       opts = args.grep(Hash).pop[:locals] rescue {}
       engine = Kernel.const_get(eng.last.first)
 
-      arg = IO.read(Fx.("../views/#{arg}.erb", __dir__)) if arg.is_a?(Symbol)      
-      layout = IO.read(Fx.("../views/layout.erb", __dir__)).then{|l| engine.new(*args){l} } 
+      lout = IO.read(Fx.("../views/layout.erb", __dir__)).then{|l| engine.new(*args){l} } 
+      arg  = IO.read(Fx.("../views/#{arg}.erb", __dir__)) if arg.is_a?(Symbol)      
             
-      engine.new(*args){ arg }.then{|t| t.render(self, opts) }.then{|doc| layout.render(self, opts){ doc } }
+      engine.new(*args){ arg }
+      .then{|t| t.render(self, opts) }.tap{|t| return t if opts[:partial] }
+      .then{|doc| lout.render(self, opts){ doc } }
     end
   end
   self

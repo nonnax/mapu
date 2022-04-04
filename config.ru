@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Id$ nonnax 2022-04-04 18:34:08 +0800
-# require_relative 'lib/mapu'
-require 'mapu'
+require_relative 'lib/mapu'
+# require 'mapu'
 
 get '/' do |param|
   erb :template, locals: param
@@ -12,7 +12,7 @@ get '/hi' do |param|
 end
 
 post '/', 'Content-type': 'application/json' do |params, data|
-  ['params: '+params.inspect,   'data: '+data.inspect].join(",")
+  erb ['params: '+params.inspect,   'data: '+data.inspect].join(","), locals: {partial: true}
 end
 
 get '/r' do |params, data|
