@@ -5,17 +5,12 @@
 require 'tilt'
 
 module Mapu
-  D, routes = Object.method(:define_method), Hash.new { |h, k| h[k] = [] }
+  D, Fx, routes = Object.method(:define_method), File.method(:expand_path), Hash.new { |h, k| h[k] = [] }
   D[:map] { routes }
   D[:res] { @res }
   D[:req] { @req }
 
-  %w[GET POST PUT DELETE].map do |m|
-    D[m.downcase] do |u, **opts, &block|
-      r = { u:, opts:, block: }
-      routes[m] << r
-    end
-  end
+  %w[GET POST PUT DELETE].map do |m| D[m.downcase]{|u, **opts, &block| { u:, opts:, block: }.then{|r| routes[m]<<r } } end
 
   def self.call(env)
     @req, @res = Rack::Request.new(env), Rack::Response.new
@@ -30,16 +25,14 @@ module Mapu
   end
 
   Tilt.default_mapping.lazy_map.each do |ext, eng|
-    define_method(ext) do |arg, *args|
+    D[ext] do |arg, *args|
       opts = args.grep(Hash).pop[:locals] rescue {}
       engine = Kernel.const_get(eng.last.first)
 
-      arg = File.read(File.expand_path("../views/#{arg}.erb", __dir__)) if arg.is_a?(Symbol)      
-      layout = File.read(File.expand_path("../views/layout.erb", __dir__)).then{|l| engine.new(*args){l} } 
+      arg = IO.read(Fx.("../views/#{arg}.erb", __dir__)) if arg.is_a?(Symbol)      
+      layout = IO.read(Fx.("../views/layout.erb", __dir__)).then{|l| engine.new(*args){l} } 
             
-      engine.new(*args){ arg }
-      .then{|t| t.render(self, opts) }
-      .then{|doc| layout.render(self, opts){ doc } }
+      engine.new(*args){ arg }.then{|t| t.render(self, opts) }.then{|doc| layout.render(self, opts){ doc } }
     end
   end
   self

@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Id$ nonnax 2022-04-04 18:34:08 +0800
-require_relative 'lib/mapu'
+# require_relative 'lib/mapu'
+require 'mapu'
 
 get '/' do |param|
   erb :template, locals: param
