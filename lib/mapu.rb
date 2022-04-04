@@ -23,13 +23,12 @@ module Mapu
     end
     [404, {}, ['Oops!']]
   end
-
+   
   Tilt.default_mapping.lazy_map.each do |ext, eng|
     D[ext] do |arg, *args|
       opts = args.grep(Hash).pop[:locals] rescue {}
-      engine = Kernel.const_get(eng.last.first)
-
-      lout = IO.read(Fx.("../views/layout.erb", __dir__)).then{|l| engine.new(*args){l} } 
+      engine = ['md', 'markdown'].include?(ext) ? Tilt::KramdownTemplate : Tilt.template_for(ext) 
+      lout = IO.read(Fx.("../views/layout.erb", __dir__)).then{|l| Tilt.template_for('erb').new(*args){l} } 
       arg  = IO.read(Fx.("../views/#{arg}.erb", __dir__)) if arg.is_a?(Symbol)      
             
       engine.new(*args){ arg }

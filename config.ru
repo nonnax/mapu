@@ -11,6 +11,10 @@ get '/hi' do |param|
   erb "hey #{param}"
 end
 
+get '/mark' do |param|
+  md "# hey #{param}"
+end
+
 post '/', 'Content-type': 'application/json' do |params, data|
   erb ['params: '+params.inspect,   'data: '+data.inspect].join(","), locals: {partial: true}
 end
