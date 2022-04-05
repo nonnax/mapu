@@ -24,7 +24,7 @@ module Mapu
     [404, {}, ['Oops!']]
   end
    
-  Tilt.default_mapping.lazy_map.each do |ext, eng|
+  Tilt.lazy_map.map do |ext, eng|
     D[ext] do |arg, *args|
       opts = args.grep(Hash).pop[:locals] rescue {}
       engine = ['md', 'markdown'].include?(ext) ? Tilt::KramdownTemplate : Tilt.template_for(ext) 
@@ -36,5 +36,4 @@ module Mapu
       .then{|doc| lout.render(self, opts){ doc } }
     end
   end
-  self
-end.tap{|x| include x}
+end
